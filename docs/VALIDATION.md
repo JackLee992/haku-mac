@@ -26,9 +26,9 @@ The final installed Haku 0.2.2 client (`ac6a3b91bd7765d80dc5a9e9f96c15ea79b93adb
 
 ## Source and package
 
-Server source is pinned at `1a30e4b07c059a22787b27c257baf74ee63e54b3` (`17.24.3+haku.2`). The optimized arm64 app/ZIP builds with strict ad-hoc signature verification. The bundle contains source/server revision metadata and license notices.
+Server source is pinned at `1a30e4b07c059a22787b27c257baf74ee63e54b3` (`17.24.3+haku.2`). The optimized arm64 app/ZIP builds with strict ad-hoc signature verification. The bundle contains source/server revision metadata and license notices. A final fresh release launch and native accessibility/screenshot inspection reconfirmed the packaged mascot, unclipped three-column layout, clear text and initial disabled-export state.
 
-The live capture and cancellation tests above exercised the shared transport through the diagnostic probe. The native GUI's actual connection, list, search/editor and USB discovery/start/connect/stop paths were observed separately. The final revised metric/result labels were compiled and reviewed in source; no new GUI export/cancel click is claimed for that revision.
+The live capture and cancellation tests above exercised the shared transport through the diagnostic probe. The native GUI's actual connection, list, editor and USB discovery/start/connect/stop paths were observed separately. The final revised metric/result labels were compiled and reviewed in source; no new GUI export/cancel click is claimed for that revision.
 
 ## Acceptance boundaries
 

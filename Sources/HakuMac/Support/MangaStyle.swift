@@ -19,6 +19,7 @@ struct MangaCard<Content: View>: View {
   }
 }
 struct MangaButtonStyle: ButtonStyle {
+  @Environment(\.isEnabled) private var isEnabled
   var color: Color = Manga.yellow
   func makeBody(configuration: Configuration) -> some View {
     configuration.label.font(.system(size: 13, weight: .bold)).padding(.horizontal, 15).padding(
