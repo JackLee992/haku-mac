@@ -1,0 +1,4 @@
+[submodule "upstream/haku-server"]
+	path = upstream/haku-server
+	url = https://github.com/JackLee992/haku-server.git
+	branch = haku
