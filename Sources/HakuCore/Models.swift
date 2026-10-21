@@ -35,6 +35,10 @@ public struct ExportResult: Sendable {
   public let status: String
   public let fullyVerified: Bool, sha256Verified: Bool, zipVerified: Bool
   public let summary: String
+  public let capturedBytes: Int64?
+  public let declaredEncryptedBytes: Int64?
+  public let bundleBytes: Int64?
+  public let ipaBytes: Int64?
 }
 public struct HakuError: LocalizedError {
   public let message: String

@@ -10,7 +10,7 @@ macOS 14+, native SwiftUI desktop; SwiftPM HakuMac UI, HakuCore library, haku-ma
 
 `public struct USBDevice: Identifiable, Hashable, Sendable`: `id: String`, `name: String`.
 
-`public struct ExportResult: Sendable`: `directory: URL`, `reportURL: URL`, `ipaURL: URL?`, `status: String`, `fullyVerified: Bool`, `sha256Verified: Bool`, `zipVerified: Bool`, `summary: String`.
+`public struct ExportResult: Sendable`: `directory: URL`, `reportURL: URL`, `ipaURL: URL?`, `status: String`, `fullyVerified: Bool`, `sha256Verified: Bool`, `zipVerified: Bool`, `summary: String`; optional `capturedBytes`, `declaredEncryptedBytes`, `bundleBytes`, `ipaBytes: Int64?`.
 
 `public final class HakuClient: @unchecked Sendable` with `public init()` and methods:
 - `func checkConnection(_ profile: ConnectionProfile) async throws -> String` (actual SSH Haku --connection AND --list reachability or server status; explicitly endpoint configuration alone isn't live server health).

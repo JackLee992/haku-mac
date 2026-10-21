@@ -73,11 +73,22 @@ struct ExportDetailView: View {
           ) {
             VStack(alignment: .leading, spacing: 12) {
               Label(
-                result.fullyVerified ? "Native capture verified" : "Partial / unverified result",
+                result.captureHeading,
                 systemImage: result.fullyVerified ? "checkmark.seal" : "exclamationmark.triangle"
               ).font(.headline)
               Text("Status: \(result.status)").font(.caption.monospaced())
               Text(result.summary).font(.callout).textSelection(.enabled)
+              if result.capturedBytes != nil || result.declaredEncryptedBytes != nil
+                || result.bundleBytes != nil || result.ipaBytes != nil
+              {
+                VStack(spacing: 7) {
+                  byteRow("Captured encrypted bytes", value: result.capturedBytes, exact: true)
+                  byteRow(
+                    "Declared encrypted bytes", value: result.declaredEncryptedBytes, exact: true)
+                  byteRow("App bundle", value: result.bundleBytes)
+                  byteRow("IPA archive", value: result.ipaBytes)
+                }.padding(.vertical, 6)
+              }
               Text(
                 "Signing, installation, ordinary launch, and app functionality are not verified by this export."
               ).font(.caption).foregroundStyle(.secondary)
@@ -105,6 +116,21 @@ struct ExportDetailView: View {
         }
       }.padding(26)
     }.background(Manga.paper)
+  }
+  @ViewBuilder
+  private func byteRow(_ label: String, value: Int64?, exact: Bool = false) -> some View {
+    if let value, value >= 0 {
+      HStack(alignment: .firstTextBaseline) {
+        Text(label).foregroundStyle(.secondary)
+        Spacer(minLength: 12)
+        Text(byteDescription(value, exact: exact)).multilineTextAlignment(.trailing).textSelection(
+          .enabled)
+      }.font(.caption)
+    }
+  }
+  private func byteDescription(_ value: Int64, exact: Bool) -> String {
+    let formatted = ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
+    return exact ? "\(formatted) (\(String(value)) bytes)" : formatted
   }
   private func verification(_ title: String, passed: Bool) -> some View {
     Label(

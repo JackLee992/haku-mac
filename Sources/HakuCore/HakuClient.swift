@@ -213,18 +213,28 @@ public final class HakuClient: @unchecked Sendable {
       progress("Downloading IPA…")
       // SSH streams archive stdout directly to a local file, avoiding in-memory archive buffering.
       let target = local.appendingPathComponent("export.ipa")
-      do { try await download(p, remote: remote + "/export.ipa", to: target) } catch {
+      var downloaded = false
+      do {
+        try await download(p, remote: remote + "/export.ipa", to: target)
+        downloaded = true
+      } catch {
         try? error.localizedDescription.write(
           to: local.appendingPathComponent("error.txt"), atomically: true, encoding: .utf8)
-        throw HakuError(
-          "IPA download failed. Report and partial archive retained at \(local.path): \(error.localizedDescription)"
-        )
+        if isCancelled() {
+          captureFailure = error
+        } else {
+          throw HakuError(
+            "IPA download failed. Report and partial archive retained at \(local.path): \(error.localizedDescription)"
+          )
+        }
       }
-      ipa = target
-      sha = try Self.sha256(target) == (report["ipa_sha256"] as? String ?? "").lowercased()
-      let test = try await run("/usr/bin/unzip", ["-t", target.path], timeout: 300)
-      zip = test.status == 0
-      try test.output.write(to: local.appendingPathComponent("zip-verification.txt"))
+      if downloaded {
+        ipa = target
+        sha = try Self.sha256(target) == (report["ipa_sha256"] as? String ?? "").lowercased()
+        let test = try await run("/usr/bin/unzip", ["-t", target.path], timeout: 300)
+        zip = test.status == 0
+        try test.output.write(to: local.appendingPathComponent("zip-verification.txt"))
+      }
     }
     let cancelError = try? String(contentsOfFile: pathForCancellationError(), encoding: .utf8)
     let full =
@@ -233,18 +243,22 @@ public final class HakuClient: @unchecked Sendable {
     let summary =
       full
       ? "Export and local SHA256/ZIP verified"
-      : "\(status) · fully verified: no · SHA256: \(sha) · ZIP: \(zip)"
+      : "Remote status: \(status) · fully verified: no · SHA256: \(sha) · ZIP: \(zip)"
         + (captureFailure.map { " · \($0.localizedDescription)" } ?? "")
         + (cancelError.map { " · \($0)" } ?? "")
         + (isCancelled() ? " · cancellation requested" : "")
     try summary.write(
       to: local.appendingPathComponent("verification.txt"), atomically: true, encoding: .utf8)
-    let localStatus =
-      isCancelled()
-      ? "cancelled" : (status == "verified" && !full ? "local_verification_failed" : status)
+    let localStatus = Self.resultStatus(
+      remoteStatus: status, cancellationRequested: isCancelled(),
+      cancellationError: cancelError != nil, fullyVerified: full)
     return ExportResult(
       directory: local, reportURL: reportURL, ipaURL: ipa, status: localStatus, fullyVerified: full,
-      sha256Verified: sha, zipVerified: zip, summary: summary)
+      sha256Verified: sha, zipVerified: zip, summary: summary,
+      capturedBytes: Self.reportByteCount(report, "captured_bytes"),
+      declaredEncryptedBytes: Self.reportByteCount(report, "declared_encrypted_bytes"),
+      bundleBytes: Self.reportByteCount(report, "bundle_bytes"),
+      ipaBytes: Self.reportByteCount(report, "ipa_bytes"))
   }
   private func download(_ p: ConnectionProfile, remote: String, to target: URL) async throws {
     let args = try sshArguments(p) + ["cat " + shellQuote(remote)]

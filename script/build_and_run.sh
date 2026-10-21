@@ -6,6 +6,8 @@ cd "$ROOT_DIR"
 APP_NAME="HakuMac"
 BUNDLE_ID="com.jacklee.haku.mac"
 CONFIGURATION="${HAKU_BUILD_CONFIGURATION:-debug}"
+SOURCE_REVISION="$(git describe --always --dirty 2>/dev/null || echo unknown)"
+SERVER_REVISION="$(git -C upstream/haku-server rev-parse HEAD 2>/dev/null || echo unavailable)"
 APP_BUNDLE="$ROOT_DIR/dist/Haku Mac.app"
 case "$MODE" in run|--verify|--debug|--logs|--telemetry|--package|--build) ;; *) echo "Usage: $0 [--verify|--debug|--logs|--telemetry|--package|--build]" >&2; exit 2;; esac
 if [[ "$MODE" != "--build" && "$MODE" != "--package" ]]; then pkill -x "$APP_NAME" >/dev/null 2>&1 || true; fi
@@ -14,6 +16,7 @@ BUILD_DIR="$(swift build -c "$CONFIGURATION" --show-bin-path)"
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources"
 cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+cp LICENSE THIRD_PARTY_NOTICES.md "$APP_BUNDLE/Contents/Resources/"
 # The UI resolves the packaged resource bundle here, with a SwiftPM fallback for development.
 cp -R "$BUILD_DIR/HakuMac_HakuMac.bundle" "$APP_BUNDLE/Contents/Resources/HakuMac_HakuMac.bundle"
 ICONSET="$ROOT_DIR/.build/Haku.iconset"
@@ -39,6 +42,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<PLIST
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>NSPrincipalClass</key><string>NSApplication</string>
 <key>NSHighResolutionCapable</key><true/>
+<key>HakuSourceRevision</key><string>$SOURCE_REVISION</string>
+<key>HakuServerRevision</key><string>$SERVER_REVISION</string>
 </dict></plist>
 PLIST
 codesign --force --sign - "$APP_BUNDLE"

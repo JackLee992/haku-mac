@@ -10,6 +10,8 @@ final class AppModel: ObservableObject {
       connected = false
       applications = []
       selectedID = nil
+      status = "Connection changed. Connect to reload the device library."
+      error = nil
     }
   }
   @Published var applications: [DeviceApplication] = []

@@ -116,6 +116,38 @@ final class HakuCoreTests: XCTestCase {
     XCTAssertTrue(FileManager.default.fileExists(atPath: result.reportURL.path))
     XCTAssertTrue(result.summary.contains("Capture exited 1"))
   }
+  func testOptionalReportByteCounts() throws {
+    let report = try XCTUnwrap(
+      JSONSerialization.jsonObject(
+        with: Data(
+          "{\"captured_bytes\":0,\"declared_encrypted_bytes\":2147483648,\"bundle_bytes\":-1,\"ipa_bytes\":true}"
+            .utf8)) as? [String: Any])
+    XCTAssertEqual(HakuClient.reportByteCount(report, "captured_bytes"), 0)
+    XCTAssertEqual(HakuClient.reportByteCount(report, "declared_encrypted_bytes"), 2_147_483_648)
+    XCTAssertNil(HakuClient.reportByteCount(report, "bundle_bytes"))
+    XCTAssertNil(HakuClient.reportByteCount(report, "ipa_bytes"))
+    XCTAssertNil(HakuClient.reportByteCount([:], "captured_bytes"))
+  }
+  func testCancellationStatusRequiresConfirmation() {
+    for remote in ["capturing", "packaging"] {
+      XCTAssertEqual(
+        HakuClient.resultStatus(
+          remoteStatus: remote, cancellationRequested: true,
+          cancellationError: false, fullyVerified: false), "cancellation_unconfirmed")
+    }
+    XCTAssertEqual(
+      HakuClient.resultStatus(
+        remoteStatus: "cancelled", cancellationRequested: true,
+        cancellationError: false, fullyVerified: false), "cancelled")
+    XCTAssertEqual(
+      HakuClient.resultStatus(
+        remoteStatus: "verified", cancellationRequested: true,
+        cancellationError: false, fullyVerified: false), "local_transfer_cancelled")
+    XCTAssertEqual(
+      HakuClient.resultStatus(
+        remoteStatus: "cancelled", cancellationRequested: true,
+        cancellationError: true, fullyVerified: false), "cancellation_unconfirmed")
+  }
   func testReportSemantics() {
     var report: [String: Any] = [
       "schema": "haku-capture-v1", "status": "verified", "fully_verified": true,

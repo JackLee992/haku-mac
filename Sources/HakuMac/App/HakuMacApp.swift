@@ -34,6 +34,7 @@ struct HakuMacApp: App {
     .commands {
       CommandGroup(replacing: .appSettings) {
         Button("Connection Settings…") { model.showConnection = true }.keyboardShortcut(",")
+          .disabled(model.busy || model.exporting)
       }
       CommandMenu("Device") {
         Button("Connect / Refresh Apps") { model.connect() }.keyboardShortcut("r").disabled(

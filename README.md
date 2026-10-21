@@ -55,6 +55,8 @@ The ZIP and probe executable are written into `dist/`. The app is ad-hoc signed 
 
 The phone produces `report.json` and, for successful or partial capture, `export.ipa`. The Mac retains a unique local run directory, downloads the artifacts, checks the IPA's SHA256 against the report, and performs an independent ZIP integrity check. Full native capture verification, partial capture, transport verification, and failures remain distinct.
 
+Captured encrypted bytes, total app-bundle bytes and IPA archive bytes are displayed independently. Cancellation distinguishes a confirmed phone report, a cancelled local transfer, and unconfirmed remote state.
+
 A valid archive does not prove app signing, installation, ordinary launch, or functional behavior. The report preserves those boundaries. Failed/cancelled output remains available for investigation, and remote output is retained rather than deleted automatically. Keep outputs outside this source repository; artifact extensions are ignored by Git as an additional guard.
 
 See [architecture](docs/ARCHITECTURE.md), [validation](docs/VALIDATION.md), and [third-party notices](THIRD_PARTY_NOTICES.md). The public server source is pinned under `upstream/haku-server` as a Git submodule and is not needed to compile the Mac app.
